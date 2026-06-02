@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum MatchStatus {
+  SCHEDULED
+  IN_PLAY
+  FINISHED
+  POSTPONED
+}
+
+enum GoalTeamSide {
+  home
+  away
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String
+  password  String
+  roles     Role[]   @default([USER])
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bets         Bet[]
+  prizes       Prize[]
+  inviteCodes  InviteCode[]
+}
+
+model InviteCode {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique
+  usado     Boolean  @default(false)
+  creadoPor Int
+  usadoPor  Int?
+  creadoEn  DateTime @default(now())
+
+  creador User @relation(fields: [creadoPor], references: [id])
+}
+
+model Match {
+  id         Int         @id @default(autoincrement())
+  externalId Int         @unique
+  homeTeam   String
+  awayTeam   String
+  matchDate  DateTime
+  homeScore  Int?
+  awayScore  Int?
+  status     MatchStatus @default(SCHEDULED)
+  stage      String?
+  group      String?
+  yellowHome Int?
+  yellowAway Int?
+  redHome    Int?
+  redAway    Int?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  bets        Bet[]
+  goalEvents  GoalEvent[]
+  extraConfig MatchExtraConfig?
+}
+
+model GoalEvent {
+  id      Int          @id @default(autoincrement())
+  matchId Int
+  player  String
+  team    GoalTeamSide
+
+  match Match @relation(fields: [matchId], references: [id])
+}
+
+model Bet {
+  id               Int      @id @default(autoincrement())
+  userId           Int
+  matchId          Int
+  homeScore        Int
+  awayScore        Int
+  points           Float    @default(0)
+  basePoints       Int      @default(0)
+  yellowHomePick   Int?
+  yellowAwayPick   Int?
+  redHomePick      Int?
+  redAwayPick      Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user             User            @relation(fields: [userId], references: [id])
+  match            Match           @relation(fields: [matchId], references: [id])
+  goalScorerPicks  GoalScorerPick[]
+
+  @@unique([userId, matchId])
+}
+
+model GoalScorerPick {
+  id     Int    @id @default(autoincrement())
+  betId  Int
+  player String
+
+  bet Bet @relation(fields: [betId], references: [id])
+}
+
+model Prize {
+  id              Int      @id @default(autoincrement())
+  name            String
+  description     String?
+  position        Int
+  awardedToUserId Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  awardedTo User? @relation(fields: [awardedToUserId], references: [id])
+}
+
+model StageExtraConfig {
+  id         Int     @id @default(autoincrement())
+  stage      String  @unique
+  trackGoals Boolean @default(false)
+  trackCards Boolean @default(false)
+  goalPoints Float   @default(1)
+  cardPoints Float   @default(1)
+}
+
+model MatchExtraConfig {
+  id         Int     @id @default(autoincrement())
+  matchId    Int     @unique
+  trackGoals Boolean @default(false)
+  trackCards Boolean @default(false)
+  goalPoints Float   @default(1)
+  cardPoints Float   @default(1)
+
+  match Match @relation(fields: [matchId], references: [id])
+}
