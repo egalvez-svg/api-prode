@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersRepository } from './users.repository';
+import { UpdateUserAccesoDto } from './dto/update-user-acceso.dto';
 
 @Injectable()
 export class UsersService {
@@ -13,14 +14,14 @@ export class UsersService {
   async findAll() {
     return this.prisma.user.findMany({
       where: { activo: true },
-      select: { id: true, email: true, name: true, roles: true, createdAt: true },
+      select: { id: true, email: true, name: true, roles: true, accesoGrupos: true, accesoEliminatoria: true, createdAt: true },
     });
   }
 
   async findOne(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id, activo: true },
-      select: { id: true, email: true, name: true, roles: true, createdAt: true },
+      select: { id: true, email: true, name: true, roles: true, accesoGrupos: true, accesoEliminatoria: true, createdAt: true },
     });
     if (!user) throw new NotFoundException('Usuario no encontrado');
     return user;
@@ -46,6 +47,12 @@ export class UsersService {
       data: { roles },
       select: { id: true, email: true, name: true, roles: true },
     });
+  }
+
+  async updateAcceso(id: number, dto: UpdateUserAccesoDto) {
+    const user = await this.prisma.user.findUnique({ where: { id, activo: true } });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+    return this.usersRepo.updateAcceso(id, dto.accesoGrupos, dto.accesoEliminatoria);
   }
 
   async getProfile(userId: number) {

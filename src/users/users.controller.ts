@@ -5,6 +5,7 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { UpdateRolesDto } from './dto/update-roles.dto';
+import { UpdateUserAccesoDto } from './dto/update-user-acceso.dto';
 import { Role } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard)
@@ -40,6 +41,16 @@ export class UsersController {
     @CurrentUser() requester: { id: number },
   ) {
     return this.users.updateRoles(id, dto.roles, requester.id);
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':id/acceso')
+  updateAcceso(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserAccesoDto,
+  ) {
+    return this.users.updateAcceso(id, dto);
   }
 
   @UseGuards(RolesGuard)
