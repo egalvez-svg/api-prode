@@ -1,4 +1,5 @@
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { PrizeFase } from '@prisma/client';
 
 export class CreatePrizeDto {
   @IsString()
@@ -11,4 +12,7 @@ export class CreatePrizeDto {
   @IsInt()
   @Min(1)
   position: number;
+
+  @IsEnum(PrizeFase)
+  fase: PrizeFase;
 }

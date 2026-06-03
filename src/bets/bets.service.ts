@@ -18,12 +18,27 @@ export class BetsService {
     private extraStatsConfig: ExtraStatsConfigService,
   ) {}
 
-  async create(userId: number, dto: CreateBetDto) {
+  async create(
+    userId: number,
+    dto: CreateBetDto,
+    accesoGrupos: boolean,
+    accesoEliminatoria: boolean,
+  ) {
     const match = await this.prisma.match.findUnique({ where: { id: dto.matchId } });
     if (!match) throw new NotFoundException('Partido no encontrado');
 
     if (match.status !== MatchStatus.SCHEDULED) {
       throw new BadRequestException('Solo se puede apostar en partidos programados');
+    }
+
+    if (match.stage !== null) {
+      const esGrupos = match.stage === 'GROUP_STAGE';
+      if (esGrupos && !accesoGrupos) {
+        throw new ForbiddenException('No tienes acceso a la fase de grupos');
+      }
+      if (!esGrupos && !accesoEliminatoria) {
+        throw new ForbiddenException('No tienes acceso a la fase eliminatoria');
+      }
     }
 
     const deadlineMinutes = this.config.get<number>('BET_DEADLINE_MINUTES', 30);

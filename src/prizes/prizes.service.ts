@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { PrizeFase } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePrizeDto } from './dto/create-prize.dto';
 import { AwardPrizeDto } from './dto/award-prize.dto';
@@ -7,16 +8,17 @@ import { AwardPrizeDto } from './dto/award-prize.dto';
 export class PrizesService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(fase?: PrizeFase) {
     return this.prisma.prize.findMany({
+      where: fase ? { fase } : undefined,
       include: { awardedTo: { select: { id: true, name: true, email: true } } },
       orderBy: { position: 'asc' },
     });
   }
 
   async create(dto: CreatePrizeDto) {
-    const exists = await this.prisma.prize.findFirst({ where: { position: dto.position } });
-    if (exists) throw new ConflictException(`Ya existe un premio para la posición ${dto.position}`);
+    const exists = await this.prisma.prize.findFirst({ where: { position: dto.position, fase: dto.fase } });
+    if (exists) throw new ConflictException(`Ya existe un premio para la posición ${dto.position} en la fase ${dto.fase}`);
 
     return this.prisma.prize.create({ data: dto });
   }
