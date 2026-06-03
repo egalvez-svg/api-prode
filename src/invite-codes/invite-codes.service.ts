@@ -1,15 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { InviteCodesRepository } from './invite-codes.repository';
+import { CreateInviteCodeDto } from './dto/create-invite-code.dto';
 
 @Injectable()
 export class InviteCodesService {
   constructor(private repo: InviteCodesRepository) {}
 
-  async generate(adminId: number) {
+  async generate(adminId: number, dto: CreateInviteCodeDto) {
     const raw = randomBytes(4).toString('hex').toUpperCase();
     const code = `${raw.slice(0, 4)}-${raw.slice(4)}`;
-    return this.repo.create(code, adminId);
+    return this.repo.create(code, adminId, dto.accesoGrupos, dto.accesoEliminatoria);
   }
 
   findAll() {
@@ -24,10 +25,11 @@ export class InviteCodesService {
     await this.repo.delete(id);
   }
 
-  async validate(code: string): Promise<void> {
+  async validate(code: string) {
     const found = await this.repo.findByCode(code);
     if (!found) throw new BadRequestException('Código de invitación inválido');
     if (found.usado) throw new BadRequestException('El código de invitación ya fue utilizado');
+    return found;
   }
 
   async consume(code: string, userId: number): Promise<void> {

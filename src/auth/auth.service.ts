@@ -15,14 +15,20 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    await this.inviteCodes.validate(dto.inviteCode);
+    const inviteCode = await this.inviteCodes.validate(dto.inviteCode);
 
     const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (exists) throw new ConflictException('El email ya está registrado');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
-      data: { email: dto.email, name: dto.name, password: hashed },
+      data: {
+        email: dto.email,
+        name: dto.name,
+        password: hashed,
+        accesoGrupos: inviteCode.accesoGrupos,
+        accesoEliminatoria: inviteCode.accesoEliminatoria,
+      },
     });
 
     await this.inviteCodes.consume(dto.inviteCode, user.id);

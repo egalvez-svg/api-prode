@@ -25,15 +25,22 @@ enum GoalTeamSide {
   away
 }
 
+enum PrizeFase {
+  GRUPOS
+  ELIMINATORIA
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  password  String
-  roles     Role[]   @default([USER])
-  activo    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  Int      @id @default(autoincrement())
+  email               String   @unique
+  name                String
+  password            String
+  roles               Role[]   @default([USER])
+  activo              Boolean  @default(true)
+  accesoGrupos        Boolean  @default(false)
+  accesoEliminatoria  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   bets         Bet[]
   prizes       Prize[]
@@ -41,12 +48,14 @@ model User {
 }
 
 model InviteCode {
-  id        Int      @id @default(autoincrement())
-  code      String   @unique
-  usado     Boolean  @default(false)
-  creadoPor Int
-  usadoPor  Int?
-  creadoEn  DateTime @default(now())
+  id                  Int      @id @default(autoincrement())
+  code                String   @unique
+  usado               Boolean  @default(false)
+  creadoPor           Int
+  usadoPor            Int?
+  creadoEn            DateTime @default(now())
+  accesoGrupos        Boolean  @default(false)
+  accesoEliminatoria  Boolean  @default(false)
 
   creador User @relation(fields: [creadoPor], references: [id])
 }
@@ -114,13 +123,14 @@ model GoalScorerPick {
 }
 
 model Prize {
-  id              Int      @id @default(autoincrement())
+  id              Int        @id @default(autoincrement())
   name            String
   description     String?
   position        Int
+  fase            PrizeFase
   awardedToUserId Int?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   awardedTo User? @relation(fields: [awardedToUserId], references: [id])
 }

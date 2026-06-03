@@ -5,8 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 export class InviteCodesRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(code: string, creadoPor: number) {
-    return this.prisma.inviteCode.create({ data: { code, creadoPor } });
+  async create(code: string, creadoPor: number, accesoGrupos: boolean, accesoEliminatoria: boolean) {
+    return this.prisma.inviteCode.create({ data: { code, creadoPor, accesoGrupos, accesoEliminatoria } });
   }
 
   async findAll() {

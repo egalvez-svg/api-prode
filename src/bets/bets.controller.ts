@@ -14,8 +14,11 @@ export class BetsController {
   constructor(private bets: BetsService) {}
 
   @Post()
-  create(@CurrentUser() user: { id: number }, @Body() dto: CreateBetDto) {
-    return this.bets.create(user.id, dto);
+  create(
+    @CurrentUser() user: { id: number; accesoGrupos: boolean; accesoEliminatoria: boolean },
+    @Body() dto: CreateBetDto,
+  ) {
+    return this.bets.create(user.id, dto, user.accesoGrupos, user.accesoEliminatoria);
   }
 
   @Get('me')
