@@ -8,4 +8,12 @@ export class UsersRepository {
   async softDelete(id: number) {
     await this.prisma.$executeRaw`UPDATE "User" SET "activo" = false WHERE "id" = ${id}`;
   }
+
+  async updateAcceso(id: number, accesoGrupos: boolean, accesoEliminatoria: boolean) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { accesoGrupos, accesoEliminatoria },
+      select: { id: true, email: true, name: true, accesoGrupos: true, accesoEliminatoria: true },
+    });
+  }
 }
