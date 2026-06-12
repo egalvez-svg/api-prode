@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { MatchesService } from './matches.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
@@ -30,5 +30,12 @@ export class MatchesController {
   @Post('sync')
   sync() {
     return this.matches.syncMatches();
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':id/toggle-ranking')
+  toggleRanking(@Param('id', ParseIntPipe) id: number) {
+    return this.matches.toggleCountForRanking(id);
   }
 }

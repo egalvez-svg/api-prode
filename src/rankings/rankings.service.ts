@@ -12,7 +12,10 @@ export class RankingsService {
         id: true,
         name: true,
         email: true,
-        bets: { select: { points: true, basePoints: true } },
+        bets: {
+          where: { match: { countForRanking: true } },
+          select: { points: true, basePoints: true },
+        },
       },
     });
 

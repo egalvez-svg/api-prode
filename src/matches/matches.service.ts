@@ -85,6 +85,16 @@ export class MatchesService {
     return match;
   }
 
+  async toggleCountForRanking(id: number) {
+    const match = await this.prisma.match.findUnique({ where: { id } });
+    if (!match) throw new NotFoundException('Partido no encontrado');
+    return this.prisma.match.update({
+      where: { id },
+      data: { countForRanking: !match.countForRanking },
+      select: { id: true, countForRanking: true },
+    });
+  }
+
   @Cron(CronExpression.EVERY_30_MINUTES)
   async syncMatches() {
     this.logger.log('Sincronizando partidos con football-data.org...');

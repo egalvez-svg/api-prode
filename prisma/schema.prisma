@@ -71,12 +71,13 @@ model Match {
   status     MatchStatus @default(SCHEDULED)
   stage      String?
   group      String?
-  yellowHome Int?
-  yellowAway Int?
-  redHome    Int?
-  redAway    Int?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  yellowHome       Int?
+  yellowAway       Int?
+  redHome          Int?
+  redAway          Int?
+  countForRanking  Boolean     @default(true)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 
   bets        Bet[]
   goalEvents  GoalEvent[]
